@@ -8,14 +8,14 @@ Duty Scheduler is a tool that creates rotating schedules for bi-weekly meeting d
 The scheduler reads a list of people from `names.txt` and produces a balanced duty plan across meetings.
 
 At a high level:
-- Every meeting has a fixed set of duty slots.
-- People are assigned in a rotating order (round-robin style).
-- The next meeting continues from where the previous one left off.
-- This keeps assignments spread out over time instead of repeatedly picking the same few people.
+- Every meeting has a fixed set of duty slots (Door and Auditorium).
+- People are selected with circular rotation, but only from those available for that meeting.
+- Midweek and weekend use separate rotation counters, so missing one type does not consume your place in the other.
+- A per-person assignment cap is enforced to avoid over-assigning the same few people.
 
 The result is a schedule that is:
 - Predictable (easy to understand)
-- Fair (rotation-based distribution)
+- Fair (rotation + availability + assignment-cap distribution)
 - Fast to regenerate whenever your team changes
 
 ## Input
@@ -31,21 +31,19 @@ Dana
 ```
 
 ## Output
-After running, the program generates a compiled binary (`scheduler`) and then creates schedule output based on the names provided.
+After running, the program generates a schedule assigning duties to people for bi-weekly meetings.
 
 Depending on how your `scheduler.vox` is configured, output may include:
 - Terminal summary output
 - A CSV file for sharing or printing
 
 ## Rotation Logic (Detailed)
-The core assignment strategy is circular:
-1. Start from the first person in the list.
-2. Fill duty slots for the current meeting from the current position.
-3. Move the pointer forward after each assignment.
-4. When the end of the list is reached, wrap back to the beginning.
-5. Continue for each future meeting.
-
-This approach avoids manual tracking and makes it simple to explain who is next and why.
+The core assignment strategy is circular with constraints:
+1. For each slot, start probing from the current counter position (midweek counter for midweek, weekend counter for weekend).
+2. Walk forward in circular order until finding someone who is available and still below the assignment cap.
+3. Reuse the same probe for Door then Auditorium in the same meeting to avoid assigning the same person twice.
+4. Advance the relevant counter after each slot so rotation continues over time.
+5. Wrap naturally at the end of the list.
 
 ## When to Regenerate the Schedule
 Regenerate whenever:
@@ -55,15 +53,11 @@ Regenerate whenever:
 
 Because generation is deterministic from your input list, you can keep scheduling consistent and transparent.
 
+## Prerequisites
+- [Vox](https://github.com/wiki/vox-lang/vox) programming language must be installed on your system.
+
 ## Usage
 1. Add names to `names.txt` (one per line)
 2. Compile: `vox build scheduler.vox`
 3. Run: `./scheduler`
 
-## About Vox
-Vox is a functional programming language designed for simplicity and expressiveness. It features:
-- Strong static typing with type inference
-- First-class functions and closures
-- Pattern matching
-- Immutable data structures by default
-- Concise syntax inspired by ML-family languages
