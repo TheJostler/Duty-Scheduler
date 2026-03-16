@@ -245,6 +245,8 @@ Print "========================================".
 a number called "counter" is 0.
 a number called "we counter" is 0.
 a number called "probe" is 0.
+a number called "curmax" is 1.
+a number called "elimit" is 0.
 a number called "week" is 1.
 a number called "didx" is 0.
 a number called "aidx" is 0.
@@ -288,6 +290,7 @@ While week is less than or equal to weeks,
     Read line from sched into unavbuf,
     seekpos2 is seekpos2 add 1.
   (Midweek Meeting - Door)
+  elimit is curmax,
   attempts is 0,
   avail is 0,
   probe is counter,
@@ -302,16 +305,31 @@ While week is less than or equal to weeks,
     if flagbyte is equal to 49 then,
       avail is 0.
     mb is byte didx of assigned,
-    if mb is greater than or equal to maxduty then,
+    if mb is greater than or equal to elimit then,
       avail is 0.
     increment attempts,
     if attempts is equal to poolsize then,
+      elimit is maxduty.
+    seekpos2 is poolsize add poolsize,
+    if attempts is equal to seekpos2 then,
+      elimit is 255.
+    seekpos2 is seekpos2 add poolsize,
+    if attempts is greater than or equal to seekpos2 then,
       avail is 1.
     seekpos2 is 0.
   counter is counter add 1,
   mb is byte didx of assigned,
   mb is mb add 1,
   Set byte didx of assigned to mb,
+  seekto is 1,
+  avail is 1,
+  While seekto is less than or equal to poolsize,
+    mb is byte seekto of assigned,
+    if mb is equal to 0 then,
+      avail is 0.
+    seekto is seekto add 1.
+  if avail is equal to 1 then,
+    curmax is maxduty.
   Seek pool to byte 1,
   seekpos is 0,
   While seekpos is less than didx,
@@ -331,6 +349,7 @@ While week is less than or equal to weeks,
   Print linebuf without newline,
   (Midweek Meeting - Auditorium)
   (Probe continues from Door search so the same person is never picked twice)
+  elimit is curmax,
   attempts is 0,
   avail is 0,
   While avail is equal to 0,
@@ -344,12 +363,18 @@ While week is less than or equal to weeks,
     if flagbyte is equal to 49 then,
       avail is 0.
     mb is byte aidx of assigned,
-    if mb is greater than or equal to maxduty then,
+    if mb is greater than or equal to elimit then,
       avail is 0.
     if aidx is equal to didx then,
       avail is 0.
     increment attempts,
     if attempts is equal to poolsize then,
+      elimit is maxduty.
+    seekpos2 is poolsize add poolsize,
+    if attempts is equal to seekpos2 then,
+      elimit is 255.
+    seekpos2 is seekpos2 add poolsize,
+    if attempts is greater than or equal to seekpos2 then,
       avail is 1.
     seekpos2 is 0.
   counter is counter add 1,
@@ -358,6 +383,15 @@ While week is less than or equal to weeks,
   mb is byte aidx of assigned,
   mb is mb add 1,
   Set byte aidx of assigned to mb,
+  seekto is 1,
+  avail is 1,
+  While seekto is less than or equal to poolsize,
+    mb is byte seekto of assigned,
+    if mb is equal to 0 then,
+      avail is 0.
+    seekto is seekto add 1.
+  if avail is equal to 1 then,
+    curmax is maxduty.
   Seek pool to byte 1,
   seekpos is 0,
   While seekpos is less than aidx,
@@ -414,6 +448,7 @@ While week is less than or equal to weeks,
     seekpos2 is seekpos2 add 1.
   (Weekend Meeting - Door)
   (Uses the weekend counter so weekend rotation is independent of midweek)
+  elimit is curmax,
   attempts is 0,
   avail is 0,
   probe is "we counter",
@@ -428,16 +463,31 @@ While week is less than or equal to weeks,
     if flagbyte is equal to 49 then,
       avail is 0.
     mb is byte didx of assigned,
-    if mb is greater than or equal to maxduty then,
+    if mb is greater than or equal to elimit then,
       avail is 0.
     increment attempts,
     if attempts is equal to poolsize then,
+      elimit is maxduty.
+    seekpos2 is poolsize add poolsize,
+    if attempts is equal to seekpos2 then,
+      elimit is 255.
+    seekpos2 is seekpos2 add poolsize,
+    if attempts is greater than or equal to seekpos2 then,
       avail is 1.
     seekpos2 is 0.
   set "we counter" to "we counter" add 1,
   mb is byte didx of assigned,
   mb is mb add 1,
   Set byte didx of assigned to mb,
+  seekto is 1,
+  avail is 1,
+  While seekto is less than or equal to poolsize,
+    mb is byte seekto of assigned,
+    if mb is equal to 0 then,
+      avail is 0.
+    seekto is seekto add 1.
+  if avail is equal to 1 then,
+    curmax is maxduty.
   Seek pool to byte 1,
   seekpos is 0,
   While seekpos is less than didx,
@@ -457,6 +507,7 @@ While week is less than or equal to weeks,
   Print linebuf without newline,
   (Weekend Meeting - Auditorium)
   (Probe continues from Door search so the same person is never picked twice)
+  elimit is curmax,
   attempts is 0,
   avail is 0,
   While avail is equal to 0,
@@ -470,12 +521,18 @@ While week is less than or equal to weeks,
     if flagbyte is equal to 49 then,
       avail is 0.
     mb is byte aidx of assigned,
-    if mb is greater than or equal to maxduty then,
+    if mb is greater than or equal to elimit then,
       avail is 0.
     if aidx is equal to didx then,
       avail is 0.
     increment attempts,
     if attempts is equal to poolsize then,
+      elimit is maxduty.
+    seekpos2 is poolsize add poolsize,
+    if attempts is equal to seekpos2 then,
+      elimit is 255.
+    seekpos2 is seekpos2 add poolsize,
+    if attempts is greater than or equal to seekpos2 then,
       avail is 1.
     seekpos2 is 0.
   set "we counter" to "we counter" add 1,
@@ -484,6 +541,15 @@ While week is less than or equal to weeks,
   mb is byte aidx of assigned,
   mb is mb add 1,
   Set byte aidx of assigned to mb,
+  seekto is 1,
+  avail is 1,
+  While seekto is less than or equal to poolsize,
+    mb is byte seekto of assigned,
+    if mb is equal to 0 then,
+      avail is 0.
+    seekto is seekto add 1.
+  if avail is equal to 1 then,
+    curmax is maxduty.
   Seek pool to byte 1,
   seekpos is 0,
   While seekpos is less than aidx,
@@ -521,6 +587,25 @@ While week is less than or equal to weeks,
 Close pool.
 Close sched.
 Close csvout.
+
+(--- Assignment Summary ---)
+Print "".
+Print "Assignment Summary:".
+Print "----------------------------------------".
+open a file for reading called pool2 at poolfile.
+On error print "Error: Cannot reopen pool file.", exit 1.
+seekpos is 1.
+While seekpos is less than or equal to poolsize,
+  Read line from pool2 into linebuf,
+  buflen is linebuf's size,
+  flagbyte is byte buflen of linebuf,
+  if flagbyte is equal to 10 then,
+    Set byte buflen of linebuf to 0.
+  mb is byte seekpos of assigned,
+  Print "  {mb}x  " without newline,
+  Print linebuf,
+  increment seekpos.
+Close pool2.
 
 (--- Footer ---)
 Print "".
