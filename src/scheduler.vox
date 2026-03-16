@@ -1,0 +1,530 @@
+(The duty Scheduler)
+(A small steward of order: it assigns duties fairly across bi-weekly meetings.)
+(Each week has two meetings: Midweek and Weekend.)
+(Each meeting has two roles: door and auditorium.)
+(Assignments are round-robin so the burden is shared gracefully.)
+(Names are read from a text file, one line per person.)
+(The final schedule is written both to the terminal and to CSV.)
+
+(--- Flag Schema ---)
+a flag called "weeks" is "-w" or "--weeks", it is a number with default 8.
+a flag called "poolfile" is "-f" or "--file", it is a text with default "names.txt".
+a flag called "outfile" is "-o" or "--output", it is a text with default "schedule.csv".
+a flag called "schedfile" is "-s" or "--schedule", it is a text with default ".sched_gen.csv".
+a flag called "gensched" is "-g" or "--gen", it is a boolean.
+a flag called "startdate" is "-d" or "--start", it is a number with default 0.
+a flag called "help" is "-h" or "--help", it is a boolean.
+
+(--- Help ---)
+If help then,
+  Print "Attendant Scheduler",
+  Print "Generates weekly meeting schedules with fair attendant distribution.",
+  Print "",
+  Print "Usage: scheduler [OPTIONS]",
+  Print "  -f, --file <path>      Path to names file, one name per line (default: names.txt)",
+  Print "  -w, --weeks <N>        Number of weeks to schedule (default: 8)",
+  Print "  -o, --output <path>    Path to output CSV file (default: schedule.csv)",
+  Print "  -s, --schedule <path>  Unavailability grid CSV (default: .sched_gen.csv)",
+  Print "  -g, --gen              Generate an empty unavailability CSV and exit",
+  Print "  -d, --start <YYYYMMDD> First midweek meeting date (default: 1st of next month)",
+  Print "  -h, --help             Show this help message",
+  Print "",
+  Print "Grid CSV format: one row per meeting (midweek, then weekend), one 0/1 column per person.",
+  Print "1 = unavailable, 0 = available. Header row with names is optional.",
+  Print "Example for 7 people, 2 weeks (with header):",
+  Print "  Alice,Bob,Charlie,Dave,Eve,Frank,Grace",
+  Print "  0,0,0,0,0,0,0",
+  Print "  1,0,0,0,0,0,0",
+  Print "  0,0,1,0,0,0,0",
+  Print "  0,0,0,0,0,0,0",
+  Exit 0.
+
+(--- Helper Function ---)
+(Compute a 1-indexed position from a counter using modulo wrap-around)
+To "choose the next index from the circle" with a number called "c" and a number called "sz".
+  Return a number, {c modulo sz} add 1.
+
+(--- Load Name Pool from File ---)
+a buffer called "linebuf" is 256 bytes in size.
+a number called "poolsize" is 0.
+
+open a file for reading called pool at poolfile.
+On error print "Error: Cannot open names file.", exit 1.
+
+(First pass: count names)
+Read line from pool into linebuf.
+While linebuf is not empty,
+  increment poolsize,
+  Read line from pool into linebuf.
+
+(--- Validation ---)
+If poolsize is less than 2 then,
+  Print "Error: Need at least 2 attendants in the pool.",
+  Exit 1.
+
+(--- Compute default start date: 1st of next month ---)
+Get current time into now.
+a number called "cur_m" is now's month.
+a number called "cur_y" is now's year.
+increment cur_m.
+If cur_m is equal to 13 then,
+  cur_m is 1,
+  increment cur_y.
+a number called "autostart" is cur_y multiply 10000.
+a number called "d1" is cur_m multiply 100.
+autostart is autostart add d1.
+autostart is autostart add 1.
+
+(--- Resolve start date: use flag value or auto default ---)
+a number called "sdate" is startdate.
+If sdate is equal to 0 then,
+  sdate is autostart.
+
+(--- Parse Start Date YYYYMMDD ---)
+a buffer called "datebuf" is 16 bytes in size.
+a number called "mw_year" is 0.
+a number called "mw_month" is 0.
+a number called "mw_day" is 0.
+mw_year is sdate divide 10000.
+d1 is sdate modulo 10000.
+mw_month is d1 divide 100.
+mw_day is d1 modulo 100.
+
+(--- Month Days Table ---)
+a buffer called "mdays" is 13 bytes in size.
+Set byte 1 of mdays to 31.
+Set byte 2 of mdays to 28.
+Set byte 3 of mdays to 31.
+Set byte 4 of mdays to 30.
+Set byte 5 of mdays to 31.
+Set byte 6 of mdays to 30.
+Set byte 7 of mdays to 31.
+Set byte 8 of mdays to 31.
+Set byte 9 of mdays to 30.
+Set byte 10 of mdays to 31.
+Set byte 11 of mdays to 30.
+Set byte 12 of mdays to 31.
+(Handle leap year for February)
+a number called "leapcheck" is 0.
+leapcheck is mw_year modulo 4.
+If leapcheck is equal to 0 then,
+  Set byte 2 of mdays to 29.
+leapcheck is mw_year modulo 100.
+If leapcheck is equal to 0 then,
+  Set byte 2 of mdays to 28.
+leapcheck is mw_year modulo 400.
+If leapcheck is equal to 0 then,
+  Set byte 2 of mdays to 29.
+
+(--- Meeting Days ---)
+(Day-of-week for each meeting. Monday=1, Tuesday=2, Wednesday=3,)
+(Thursday=4, Friday=5, Saturday=6, Sunday=7.)
+(Change these if your meeting days change.)
+(The --start flag should always be the date of the first midweek meeting.)
+a number called "midweekday" is 3. (Wednesday)
+a number called "weekendday" is 7. (Sunday)
+a number called "wkendgap" is weekendday subtract midweekday.
+
+(--- Month Names Table ---)
+a buffer called "allmonths" is 37 bytes in size.
+set allmonths to "JanFebMarAprMayJunJulAugSepOctNovDec".
+a buffer called "mname" is 5 bytes in size.
+a number called "mpos" is 0.
+a number called "mb" is 0.
+a number called "week day" is 0.
+a number called "we_month" is 0.
+a number called "we_year" is 0.
+a number called "dim" is 0.
+a buffer called "we_mname" is 5 bytes in size.
+
+(--- Build Header Row for Schedule CSV ---)
+a buffer called "headerbuf" is 4096 bytes in size.
+a number called "hdrlen" is 0.
+a number called "hdrbyte" is 0.
+Seek pool to byte 1.
+Read line from pool into linebuf.
+hdrlen is linebuf's size.
+hdrbyte is byte hdrlen of linebuf.
+If hdrbyte is equal to 10 then,
+  Set byte hdrlen of linebuf to 44.
+If hdrbyte is not equal to 10 then,
+  append "," to linebuf.
+copy linebuf to headerbuf.
+a number called "ni" is 1.
+While ni is less than poolsize,
+  Read line from pool into linebuf,
+  hdrlen is linebuf's size,
+  hdrbyte is byte hdrlen of linebuf,
+  if hdrbyte is equal to 10 then,
+    Set byte hdrlen of linebuf to 44.
+  if hdrbyte is not equal to 10 then,
+    append "," to linebuf.
+  append linebuf to headerbuf,
+  increment ni.
+(Replace trailing comma with newline)
+hdrlen is headerbuf's size.
+Set byte hdrlen of headerbuf to 10.
+
+(--- Create Default Schedule Grid ---)
+(Always create a default all-zeros grid file, then open the appropriate one)
+a buffer called "unavbuf" is 256 bytes in size.
+a number called "pi" is 1.
+set unavbuf to "0".
+While pi is less than poolsize,
+  append ",0" to unavbuf,
+  pi is pi add 1.
+append "\n" to unavbuf.
+
+a buffer called "gridbuf" is 4096 bytes in size.
+set gridbuf to "".
+a number called "wk" is 0.
+a number called "gridrows" is weeks multiply 2.
+While wk is less than gridrows,
+  append unavbuf to gridbuf,
+  wk is wk add 1.
+
+a text called "genpath" is "/dev/null".
+If gensched then,
+  genpath is ".sched_gen.csv".
+open a file for writing called genfile at genpath.
+On error print "Error: Cannot create gen file.", exit 1.
+Write headerbuf to genfile.
+Write gridbuf to genfile.
+Close genfile.
+If gensched then,
+  Print "Generated .sched_gen.csv ({gridrows} meeting rows x {poolsize} people, all zeros).",
+  Print "Rows alternate: midweek, weekend, midweek, weekend, ...",
+  Exit 0.
+
+open a file for reading called sched at schedfile.
+On error print "Error: Cannot open schedule file.", exit 1.
+
+(Detect header row: if first byte is not 0 or 1, it is a header)
+a number called "hasheader" is 1.
+Read line from sched into linebuf.
+hdrbyte is byte 1 of linebuf.
+If hdrbyte is equal to 48 then,
+  hasheader is 0.
+If hdrbyte is equal to 49 then,
+  hasheader is 0.
+
+(--- Open CSV output ---)
+a buffer called "csvline" is 512 bytes in size.
+open a file for writing called csvout at outfile.
+On error print "Error: Cannot open output file.", exit 1.
+Write "Week,Date,Meeting,Door,Auditorium\n" to csvout.
+a buffer called "doorbuf" is 256 bytes in size.
+a buffer called "assigned" is 256 bytes in size.
+
+(--- Print Header ---)
+a number called "total slots" is weeks multiply 4.
+a number called "maxduty" is "total slots" divide poolsize.
+maxduty is maxduty add 1.
+Print "========================================".
+Print "       Attendant Schedule".
+Print "========================================".
+Print "Pool: {poolsize} attendants".
+Print "Weeks: {weeks}".
+Print "Meetings per week: 2".
+Print "Roles per meeting: door, auditorium".
+Print "Total assignment slots: {total slots}".
+Print "Start: {mw_day}/{mw_month}/{mw_year}".
+Print "========================================".
+
+(--- Schedule Generation ---)
+(Separate round-robin counters for midweek and weekend so that being)
+(unavailable for one meeting type cannot burn your position in the other.)
+(Each counter tracks the probe: it jumps past all checked positions.)
+(A maxduty cap prevents anyone from being assigned too many times,)
+(forcing the probe to reach underutilised people.)
+(Within each meeting the probe is shared between door and auditorium so the)
+(same person is never assigned twice in one meeting.)
+(Pre-read schedule row per meeting, then flat retry loops with byte check.)
+(Grid byte position for person idx: idx subtract 1 multiply 2 add 1.)
+(ASCII 49 is the character 1 meaning unavailable.)
+a number called "counter" is 0.
+a number called "we counter" is 0.
+a number called "probe" is 0.
+a number called "week" is 1.
+a number called "didx" is 0.
+a number called "aidx" is 0.
+a number called "seekpos" is 0.
+a number called "seekpos2" is 0.
+a number called "buflen" is 0.
+a number called "bytepos" is 0.
+a number called "flagbyte" is 0.
+a number called "attempts" is 0.
+a number called "avail" is 0.
+a number called "seekto" is 0.
+set mname to "xxx".
+set we_mname to "xxx".
+set "we counter" to poolsize divide 2.
+Set byte poolsize of assigned to 0.
+
+While week is less than or equal to weeks,
+  Print "",
+  Print "Week {week}",
+  Print "----------------------------------------",
+  (Compute midweek month name)
+  mpos is mw_month subtract 1,
+  mpos is mpos multiply 3,
+  mpos is mpos add 1,
+  mb is byte mpos of allmonths,
+  Set byte 1 of mname to mb,
+  mpos is mpos add 1,
+  mb is byte mpos of allmonths,
+  Set byte 2 of mname to mb,
+  mpos is mpos add 1,
+  mb is byte mpos of allmonths,
+  Set byte 3 of mname to mb,
+  (Pre-read the schedule row for midweek meeting this week)
+  Seek sched to byte 1,
+  seekto is week subtract 1,
+  seekto is seekto multiply 2,
+  seekto is seekto add 1,
+  seekto is seekto add hasheader,
+  seekpos2 is 0,
+  While seekpos2 is less than seekto,
+    Read line from sched into unavbuf,
+    seekpos2 is seekpos2 add 1.
+  (Midweek Meeting - Door)
+  attempts is 0,
+  avail is 0,
+  probe is counter,
+  While avail is equal to 0,
+    didx is "choose the next index from the circle" of probe and poolsize,
+    probe is probe add 1,
+    avail is 1,
+    bytepos is didx subtract 1,
+    bytepos is bytepos multiply 2,
+    bytepos is bytepos add 1,
+    flagbyte is byte bytepos of unavbuf,
+    if flagbyte is equal to 49 then,
+      avail is 0.
+    mb is byte didx of assigned,
+    if mb is greater than or equal to maxduty then,
+      avail is 0.
+    increment attempts,
+    if attempts is equal to poolsize then,
+      avail is 1.
+    seekpos2 is 0.
+  counter is counter add 1,
+  mb is byte didx of assigned,
+  mb is mb add 1,
+  Set byte didx of assigned to mb,
+  Seek pool to byte 1,
+  seekpos is 0,
+  While seekpos is less than didx,
+    Read line from pool into linebuf,
+    increment seekpos.
+  copy linebuf to doorbuf,
+  buflen is linebuf's size,
+  flagbyte is byte buflen of linebuf,
+  if flagbyte is equal to 10 then,
+    Set byte buflen of doorbuf to 44,
+    Set byte buflen of linebuf to 0.
+  if flagbyte is not equal to 10 then,
+    append "," to doorbuf.
+  Print "  Midweek Meeting ({mw_day} " without newline,
+  Print mname without newline,
+  Print ")  |  Door: " without newline,
+  Print linebuf without newline,
+  (Midweek Meeting - Auditorium)
+  (Probe continues from Door search so the same person is never picked twice)
+  attempts is 0,
+  avail is 0,
+  While avail is equal to 0,
+    aidx is "choose the next index from the circle" of probe and poolsize,
+    probe is probe add 1,
+    avail is 1,
+    bytepos is aidx subtract 1,
+    bytepos is bytepos multiply 2,
+    bytepos is bytepos add 1,
+    flagbyte is byte bytepos of unavbuf,
+    if flagbyte is equal to 49 then,
+      avail is 0.
+    mb is byte aidx of assigned,
+    if mb is greater than or equal to maxduty then,
+      avail is 0.
+    if aidx is equal to didx then,
+      avail is 0.
+    increment attempts,
+    if attempts is equal to poolsize then,
+      avail is 1.
+    seekpos2 is 0.
+  counter is counter add 1,
+  if aidx is equal to didx then,
+    aidx is "choose the next index from the circle" of probe and poolsize.
+  mb is byte aidx of assigned,
+  mb is mb add 1,
+  Set byte aidx of assigned to mb,
+  Seek pool to byte 1,
+  seekpos is 0,
+  While seekpos is less than aidx,
+    Read line from pool into linebuf,
+    increment seekpos.
+  set datebuf to "{mw_day} ",
+  append mname to datebuf,
+  set csvline to " {mw_year}",
+  append csvline to datebuf,
+  set csvline to "{week},",
+  append datebuf to csvline,
+  append ",Midweek Meeting," to csvline,
+  Write csvline to csvout,
+  Write doorbuf to csvout,
+  Write linebuf to csvout,
+  buflen is linebuf's size,
+  flagbyte is byte buflen of linebuf,
+  if flagbyte is not equal to 10 then,
+    Write "\n" to csvout.
+  if flagbyte is equal to 10 then,
+    Set byte buflen of linebuf to 0.
+  Print "  |  Auditorium: " without newline,
+  Print linebuf,
+  (Compute weekend date = midweek + wkendgap)
+  set "we day" to mw_day add wkendgap,
+  we_month is mw_month,
+  we_year is mw_year,
+  dim is byte we_month of mdays,
+  if "we day" is greater than dim then,
+    set "we day" to "we day" subtract dim,
+    increment we_month.
+  if we_month is equal to 13 then,
+    we_month is 1,
+    increment we_year.
+  (Compute weekend month name)
+  mpos is we_month subtract 1,
+  mpos is mpos multiply 3,
+  mpos is mpos add 1,
+  mb is byte mpos of allmonths,
+  Set byte 1 of we_mname to mb,
+  mpos is mpos add 1,
+  mb is byte mpos of allmonths,
+  Set byte 2 of we_mname to mb,
+  mpos is mpos add 1,
+  mb is byte mpos of allmonths,
+  Set byte 3 of we_mname to mb,
+  (Pre-read the schedule row for weekend meeting this week)
+  Seek sched to byte 1,
+  seekto is week multiply 2,
+  seekto is seekto add hasheader,
+  seekpos2 is 0,
+  While seekpos2 is less than seekto,
+    Read line from sched into unavbuf,
+    seekpos2 is seekpos2 add 1.
+  (Weekend Meeting - Door)
+  (Uses the weekend counter so weekend rotation is independent of midweek)
+  attempts is 0,
+  avail is 0,
+  probe is "we counter",
+  While avail is equal to 0,
+    didx is "choose the next index from the circle" of probe and poolsize,
+    probe is probe add 1,
+    avail is 1,
+    bytepos is didx subtract 1,
+    bytepos is bytepos multiply 2,
+    bytepos is bytepos add 1,
+    flagbyte is byte bytepos of unavbuf,
+    if flagbyte is equal to 49 then,
+      avail is 0.
+    mb is byte didx of assigned,
+    if mb is greater than or equal to maxduty then,
+      avail is 0.
+    increment attempts,
+    if attempts is equal to poolsize then,
+      avail is 1.
+    seekpos2 is 0.
+  set "we counter" to "we counter" add 1,
+  mb is byte didx of assigned,
+  mb is mb add 1,
+  Set byte didx of assigned to mb,
+  Seek pool to byte 1,
+  seekpos is 0,
+  While seekpos is less than didx,
+    Read line from pool into linebuf,
+    increment seekpos.
+  copy linebuf to doorbuf,
+  buflen is linebuf's size,
+  flagbyte is byte buflen of linebuf,
+  if flagbyte is equal to 10 then,
+    Set byte buflen of doorbuf to 44,
+    Set byte buflen of linebuf to 0.
+  if flagbyte is not equal to 10 then,
+    append "," to doorbuf.
+  Print "  Weekend Meeting ({we day} " without newline,
+  Print we_mname without newline,
+  Print ")  |  Door: " without newline,
+  Print linebuf without newline,
+  (Weekend Meeting - Auditorium)
+  (Probe continues from Door search so the same person is never picked twice)
+  attempts is 0,
+  avail is 0,
+  While avail is equal to 0,
+    aidx is "choose the next index from the circle" of probe and poolsize,
+    probe is probe add 1,
+    avail is 1,
+    bytepos is aidx subtract 1,
+    bytepos is bytepos multiply 2,
+    bytepos is bytepos add 1,
+    flagbyte is byte bytepos of unavbuf,
+    if flagbyte is equal to 49 then,
+      avail is 0.
+    mb is byte aidx of assigned,
+    if mb is greater than or equal to maxduty then,
+      avail is 0.
+    if aidx is equal to didx then,
+      avail is 0.
+    increment attempts,
+    if attempts is equal to poolsize then,
+      avail is 1.
+    seekpos2 is 0.
+  set "we counter" to "we counter" add 1,
+  if aidx is equal to didx then,
+    aidx is "choose the next index from the circle" of probe and poolsize.
+  mb is byte aidx of assigned,
+  mb is mb add 1,
+  Set byte aidx of assigned to mb,
+  Seek pool to byte 1,
+  seekpos is 0,
+  While seekpos is less than aidx,
+    Read line from pool into linebuf,
+    increment seekpos.
+  set datebuf to "{we day} ",
+  append we_mname to datebuf,
+  set csvline to " {we_year}",
+  append csvline to datebuf,
+  set csvline to "{week},",
+  append datebuf to csvline,
+  append ",Weekend Meeting," to csvline,
+  Write csvline to csvout,
+  Write doorbuf to csvout,
+  Write linebuf to csvout,
+  buflen is linebuf's size,
+  flagbyte is byte buflen of linebuf,
+  if flagbyte is not equal to 10 then,
+    Write "\n" to csvout.
+  if flagbyte is equal to 10 then,
+    Set byte buflen of linebuf to 0.
+  Print "  |  Auditorium: " without newline,
+  Print linebuf,
+  (Advance midweek date by 7 for next week)
+  mw_day is mw_day add 7,
+  dim is byte mw_month of mdays,
+  if mw_day is greater than dim then,
+    mw_day is mw_day subtract dim,
+    increment mw_month.
+  if mw_month is equal to 13 then,
+    mw_month is 1,
+    increment mw_year.
+  increment week.
+
+Close pool.
+Close sched.
+Close csvout.
+
+(--- Footer ---)
+Print "".
+Print "========================================".
+Print "Schedule complete.".
+Print "CSV written to: {outfile}".
+Print "========================================".
