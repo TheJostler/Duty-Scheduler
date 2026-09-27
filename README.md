@@ -10,9 +10,10 @@ spreadsheet can open.
 ## The two input files
 
 **The names file** (`-f`, default `names.txt`): one person per line,
-the trimmed line being the name. Blank lines are skipped. Fewer than
-two names is an error - a meeting has two duties and one person
-cannot hold both.
+the name being the text before the first `:` on the line, trimmed -
+a phone number or a note may follow the colon and is ignored. Blank
+lines are skipped. Fewer than two names is an error - a meeting has
+two duties and one person cannot hold both.
 
 **The availability grid** (`-s`, default `availability.csv`): a CSV
 with one row per meeting, in order (midweek, weekend, midweek, ...),
