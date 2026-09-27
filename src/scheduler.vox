@@ -8,6 +8,9 @@ see "./availability.vox".
 see "./duties.vox".
 see "./report.vox".
 
+A text called Program is arguments's name.
+A text called 'Program Version' is "1.0.0".
+
 A flag called weeks is "-w" or "--weeks", it is a number with default 8.
 A flag called 'names path' is "-f" or "--file", it is a text with default "names.txt".
 A flag called 'start date as typed' is "-d" or "--start", it is a text.
@@ -15,8 +18,13 @@ A flag called 'grid path' is "-s" or "--schedule", it is a text with default "av
 A flag called 'wants an empty grid' is "-g" or "--gen", it is a boolean.
 A flag called 'csv path' is "-o" or "--output", it is a text with default "schedule.csv".
 A flag called 'wants help' is "-h" or "--help", it is a boolean.
+A flag called 'wants version' is "-v" or "--version", it is a boolean.
 
 Parse flags.
+
+To 'show version'.
+  Print "{Program} (duty-scheduler) {Program Version} by Josjuar Lister".
+  Exit 0.
 
 If 'wants help' then,
   Print "duty-scheduler: fair door and auditorium duties for midweek and weekend meetings",
@@ -32,6 +40,7 @@ If 'wants help' then,
   Print "  -g, --gen              Write an empty availability grid to the -s path and exit",
   Print "  -o, --output <path>    Schedule CSV to write (default: schedule.csv)",
   Print "  -h, --help             Show this help",
+  Print "  -v, --version          Show the version",
   Print "",
   Print "Grid format: a header row of \"Meeting\" then the names, then one row per meeting",
   Print "(midweek, weekend, midweek, ...) whose first cell is the meeting's label and",
@@ -41,6 +50,8 @@ If 'wants help' then,
   Print "  Wed 29 Jul 2026 midweek,0,1,0",
   Print "  Sun 2 Aug 2026 weekend,0,0,0",
   Exit 0.
+
+If 'wants version' then, 'show version'.
 
 If weeks is less than 1 then,
   Print "scheduler: --weeks must be at least 1",

@@ -11,6 +11,7 @@ Usage: scheduler [OPTIONS]
   -g, --gen              Write an empty availability grid to the -s path and exit
   -o, --output <path>    Schedule CSV to write (default: schedule.csv)
   -h, --help             Show this help
+  -v, --version          Show the version
 
 Grid format: a header row of "Meeting" then the names, then one row per meeting
 (midweek, weekend, midweek, ...) whose first cell is the meeting's label and

@@ -9,9 +9,10 @@ for case_dir in "$root"/tests/cases/*/; do
   case_name=$(basename "$case_dir")
   work_dir=$(mktemp -d)
   cp -r "$case_dir." "$work_dir"/
+  cp "$root/scheduler" "$work_dir"/
 
   readarray -t case_args < <(xargs -n1 < "$work_dir/args")
-  (cd "$work_dir" && "$root/scheduler" "${case_args[@]}" >actual.out 2>&1; echo $? >actual.status)
+  (cd "$work_dir" && ./scheduler "${case_args[@]}" >actual.out 2>&1; echo $? >actual.status)
 
   report=$(mktemp)
   case_passed=1

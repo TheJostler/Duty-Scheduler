@@ -69,6 +69,7 @@ schedule still completes.
   -g, --gen              Write an empty availability grid to the -s path and exit
   -o, --output <path>    Schedule CSV to write (default: schedule.csv)
   -h, --help             Show this help
+  -v, --version          Show the version
 ```
 
 The meeting days themselves (Wednesday and Sunday) are two named
