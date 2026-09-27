@@ -1,0 +1,21 @@
+duty-scheduler: fair door and auditorium duties for midweek and weekend meetings
+
+Usage: scheduler [OPTIONS]
+  -f, --file <path>      Names file, one person per line (default: names.txt)
+  -w, --weeks <N>        Number of weeks to schedule (default: 8)
+  -d, --start <date>     Date of the first midweek meeting (default: the first
+                         midweek meeting day on or after the 1st of next month).
+                         Accepts 2026-07-29, 20260729, 29 Jul 2026, or a phrase
+                         such as "next wednesday".
+  -s, --schedule <path>  Availability grid CSV (default: availability.csv)
+  -g, --gen              Write an empty availability grid to the -s path and exit
+  -o, --output <path>    Schedule CSV to write (default: schedule.csv)
+  -h, --help             Show this help
+
+Grid format: a header row of "Meeting" then the names, then one row per meeting
+(midweek, weekend, midweek, ...) whose first cell is the meeting's label and
+whose other cells are 0 (available) or 1 (unavailable). Columns are matched
+to people by the header name, in any order. Example for three people, one week:
+  Meeting,Alice,Bob,Charlie
+  Wed 29 Jul 2026 midweek,0,1,0
+  Sun 2 Aug 2026 weekend,0,0,0
