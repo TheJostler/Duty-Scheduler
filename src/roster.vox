@@ -14,7 +14,7 @@ To 'read the names from' with a text called path.
   a list called 'the raw lines' is 'split lines' of 'the file text'.
   For each 'raw line' in 'the raw lines',
     a text called 'the trimmed line' is trim of 'raw line',
-    if 'the trimmed line' is not "" then, append 'the trimmed line' to names..
+    if 'the trimmed line' is not empty then, append 'the trimmed line' to names..
   If names's length is less than 2 then,
     Print "scheduler: need at least two people in {path}",
     Exit 1.

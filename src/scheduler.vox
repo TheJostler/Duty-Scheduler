@@ -48,7 +48,7 @@ If weeks is less than 1 then,
 
 'read the names from' with 'names path'.
 the 'meeting count' is weeks multiply 2.
-the 'the first midweek moment' is 'the first midweek moment typed as' of 'start date as typed'.
+Set 'the first midweek moment' to 'the first midweek moment typed as' of 'start date as typed'.
 
 If 'wants an empty grid' then, 'write an empty grid to' with 'grid path'.
 

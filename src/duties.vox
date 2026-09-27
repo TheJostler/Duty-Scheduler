@@ -35,10 +35,10 @@ To 'the best person for' with a number called 'meeting number' and a number call
   For each position from 1 to names's length,
     a text called person is element position of names,
     if position is not 'the person already on duty' and {'is free for meeting' of person and 'meeting number'} and {'a candidate is better than the current best' of position and 'the best position'} then,
-      the 'the best position' is position..
+      Set 'the best position' to position..
   Return a number, 'the best position'.
 
-To 'record a duty for' with a number called position and a number called 'meeting number'.
+To 'record a duty' with a number called position and a number called 'meeting number'.
   a number called 'the new duty count' is {element position of 'duty counts'} add 1.
   Set element position of 'duty counts' to 'the new duty count'.
   Set element position of 'last duty meeting' to 'meeting number'.
@@ -50,13 +50,13 @@ To 'assign the duties of meeting' with a number called 'meeting number'.
   If 'the door holder' is 0 then,
     append "{'the meeting label'} door: nobody is available" to 'unfilled slots'.
   Otherwise,
-    'record a duty for' of 'the door holder' and 'meeting number'.
+    'record a duty' of 'the door holder' and 'meeting number'.
   a number called 'the auditorium holder' is 'the best person for' of 'meeting number' and 'the door holder'.
   Set element 'meeting number' of 'auditorium holders' to 'the auditorium holder'.
   If 'the auditorium holder' is 0 then,
     append "{'the meeting label'} auditorium: nobody is available" to 'unfilled slots'.
   Otherwise,
-    'record a duty for' of 'the auditorium holder' and 'meeting number'.
+    'record a duty' of 'the auditorium holder' and 'meeting number'.
 
 To 'assign every duty'.
   For each 'meeting number' from 1 to 'meeting count', 'assign the duties of meeting' of 'meeting number'.

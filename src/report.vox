@@ -2,7 +2,7 @@
 
 a list called 'people already summarised' is [].
 
-To 'the holder text for' with a number called position.
+To 'the holder text' with a number called position.
   If position is 0 then, Return a text, "UNFILLED".
   Return a text, element position of names.
 
@@ -12,8 +12,8 @@ To 'print the meeting line for' with a number called 'meeting number'.
   a text called kind is 'the kind of meeting' of 'meeting number'.
   a number called 'the door holder' is element 'meeting number' of 'door holders'.
   a number called 'the auditorium holder' is element 'meeting number' of 'auditorium holders'.
-  a text called 'the door name' is 'the holder text for' of 'the door holder'.
-  a text called 'the auditorium name' is 'the holder text for' of 'the auditorium holder'.
+  a text called 'the door name' is 'the holder text' of 'the door holder'.
+  a text called 'the auditorium name' is 'the holder text' of 'the auditorium holder'.
   a number called 'the name field width' is {'the longest name length'} add 2.
   a text called 'the padded door name' is 'pad right' of 'the door name' and 'the name field width'.
   Print "  {'the long date'}  {kind}   door: {'the padded door name'}  auditorium: {'the auditorium name'}".
@@ -38,7 +38,7 @@ To 'the next person to summarise'.
   For each position from 1 to names's length,
     a boolean called 'already summarised' is element position of 'people already summarised',
     if 'already summarised' is false and {'a person is a better summary candidate than the current best' of position and 'the best position'} then,
-      the 'the best position' is position..
+      Set 'the best position' to position..
   Return a number, 'the best position'.
 
 To 'print the summary'.
@@ -73,8 +73,8 @@ To 'write the csv row for' with a number called 'meeting number' and a file call
   a text called 'the meeting label' is 'the meeting label for the csv' of 'meeting number'.
   a number called 'the door holder' is element 'meeting number' of 'door holders'.
   a number called 'the auditorium holder' is element 'meeting number' of 'auditorium holders'.
-  a text called door is 'the holder text for' of 'the door holder'.
-  a text called auditorium is 'the holder text for' of 'the auditorium holder'.
+  a text called door is 'the holder text' of 'the door holder'.
+  a text called auditorium is 'the holder text' of 'the auditorium holder'.
   Write "{week},{date},{'the meeting label'},{door},{auditorium}\n" to output.
 
 To 'write the csv to' with a text called path.

@@ -1,63 +1,122 @@
 # Duty Scheduler
-A simple schedule creator that assigns duties for bi-weekly meetings written in vox.
 
-## Overview
-Duty Scheduler is a tool that creates rotating schedules for bi-weekly meeting duties, automatically assigning tasks to team members.
+A congregation has two meetings a week, midweek and weekend. Each
+needs an attendant on the door and one in the auditorium. This program
+hands out those four duties a week across everyone in a names file,
+fairly, without giving a duty to someone who has said they are away,
+and publishes the result as a schedule you can read and a CSV your
+spreadsheet can open.
 
-## How the Scheduler Works
-The scheduler reads a list of people from `names.txt` and produces a balanced duty plan across meetings.
+## The two input files
 
-At a high level:
-- Every meeting has a fixed set of duty slots (Door and Auditorium).
-- People are selected with circular rotation, but only from those available for that meeting.
-- Midweek and weekend use separate rotation counters, so missing one type does not consume your place in the other.
-- A per-person assignment cap is enforced to avoid over-assigning the same few people.
+**The names file** (`-f`, default `names.txt`): one person per line,
+the trimmed line being the name. Blank lines are skipped. Fewer than
+two names is an error - a meeting has two duties and one person
+cannot hold both.
 
-The result is a schedule that is:
-- Predictable (easy to understand)
-- Fair (rotation + availability + assignment-cap distribution)
-- Fast to regenerate whenever your team changes
+**The availability grid** (`-s`, default `availability.csv`): a CSV
+with one row per meeting, in order (midweek, weekend, midweek, ...),
+and one `0`/`1` column per person, `1` meaning unavailable. It is
+optional: a missing file means everyone is available.
 
-## Input
-The scheduler currently expects:
-- `names.txt`: one name per line, in the order you want the rotation to follow.
+Its first row is a header when it does not begin with a digit. The
+header names the people the columns belong to, **in any order** -
+columns are matched by the header's name text, not by position. A
+header name that is not in the names file is reported and its column
+ignored; a person in the names file with no column is reported and
+treated as always available. Without a header, columns are taken in
+names-file order, with a warning that says so. If the header's first
+cell is `Meeting`, that first column of every row is a label for the
+row and is skipped when matching data. Rows beyond the number of
+meetings are ignored; meetings beyond the number of rows are fully
+available; a short row leaves its missing people available, and extra
+cells past the header's columns are ignored.
 
-Example:
-```txt
-Alice
-Bob
-Charlie
-Dana
+Example, three people, one week:
+
+```
+Meeting,Alice,Bob,Charlie
+Wed 29 Jul 2026 midweek,0,1,0
+Sun 2 Aug 2026 weekend,0,0,0
 ```
 
+`-g` writes an empty grid like the one above (every cell `0`) to the
+`-s` path and exits; it refuses to overwrite a file that already
+exists, since the grid is where a person's hand-typed availability
+lives.
+
+## The assignment rule
+
+For each meeting's two slots (door, then auditorium), among the
+people who are available for that meeting and not already holding the
+other slot in it, pick: the person with the fewest duties so far;
+then, among those, the one whose last duty was longest ago (never
+having had one counts as longest); then, among those, the one earliest
+in the names file. If nobody qualifies, the slot is `UNFILLED` and the
+schedule still completes.
+
+## Flags
+
+```
+  -f, --file <path>      Names file, one person per line (default: names.txt)
+  -w, --weeks <N>        Number of weeks to schedule (default: 8)
+  -d, --start <date>     Date of the first midweek meeting (default: the first
+                         midweek meeting day on or after the 1st of next month).
+                         Accepts 2026-07-29, 20260729, 29 Jul 2026, or a phrase
+                         such as "next wednesday".
+  -s, --schedule <path>  Availability grid CSV (default: availability.csv)
+  -g, --gen              Write an empty availability grid to the -s path and exit
+  -o, --output <path>    Schedule CSV to write (default: schedule.csv)
+  -h, --help             Show this help
+```
+
+The meeting days themselves (Wednesday and Sunday) are two named
+constants at the top of `src/calendar.vox`; change them there if the
+congregation's schedule ever moves.
+
 ## Output
-After running, the program generates a schedule assigning duties to people for bi-weekly meetings.
 
-Depending on how your `scheduler.vox` is configured, output may include:
-- Terminal summary output
-- A CSV file for sharing or printing
+The terminal shows a header (pool size, weeks, start date, and where
+the availability came from), each week's two meetings on their own
+lines, then a summary: every person's duty count (most first, ties in
+names-file order), any grid warnings, and any unfilled slots.
 
-## Rotation Logic (Detailed)
-The core assignment strategy is circular with constraints:
-1. For each slot, start probing from the current counter position (midweek counter for midweek, weekend counter for weekend).
-2. Walk forward in circular order until finding someone who is available and still below the assignment cap.
-3. Reuse the same probe for Door then Auditorium in the same meeting to avoid assigning the same person twice.
-4. Advance the relevant counter after each slot so rotation continues over time.
-5. Wrap naturally at the end of the list.
+The CSV keeps the columns `Week,Date,Meeting,Door,Auditorium`, dates
+as `29 Jul 2026`, meeting as `Midweek Meeting` or `Weekend Meeting`, so
+an existing spreadsheet workflow built on it is untouched. An unfilled
+slot prints `UNFILLED` in both the terminal and the CSV.
 
-## When to Regenerate the Schedule
-Regenerate whenever:
-- A person is added or removed from `names.txt`
-- Meeting count or schedule period changes
-- You want a fresh schedule starting from the current roster
+## Build and test
 
-Because generation is deterministic from your input list, you can keep scheduling consistent and transparent.
+Requires [Vox](https://vox-lang.dev) 0.4.15 and vox-libs 0.3.0
+(`date` 0.1, `textkit` 0.2), installed at `/usr/include/vox` and
+`/usr/lib64`.
 
-## Prerequisites
-- [Vox](https://github.com/wiki/vox-lang/vox) programming language must be installed on your system.
+```
+make          # builds ./scheduler
+make test     # runs tests/run.sh against tests/cases/
+```
 
-## Usage
-1. Add names to `names.txt` (one per line)
-2. Compile: `vox build scheduler.vox`
-3. Run: `./scheduler`
+`Makefile` builds against `$(VOXLIBS)/build`, where `VOXLIBS` defaults
+to `../english/vox-libs`; override it to point at any checkout of
+vox-libs, so the program compiles against a development build before
+the libraries are installed system-wide, and against the installed
+copy afterwards without any change:
 
+```
+make VOXLIBS=/path/to/vox-libs
+```
+
+## Layout
+
+One entry file and five included ones, each a few dozen lines with one
+job:
+
+| File | Job |
+|---|---|
+| `src/scheduler.vox` | flags, help, the order of the steps, exit codes |
+| `src/roster.vox` | read the names file |
+| `src/calendar.vox` | the meeting days; the start date rule; a meeting's moment and label |
+| `src/availability.vox` | read the grid; "is this person free at meeting N"; the warnings; write an empty grid |
+| `src/duties.vox` | the assignment rule; the per-person counts and last-duty record |
+| `src/report.vox` | the terminal schedule, the summary, the CSV |

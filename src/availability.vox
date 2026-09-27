@@ -1,11 +1,12 @@
-see textkit version "0.2" from "textkit.lib".
-
 (src/availability.vox: read the grid; answer "is this person free at
  meeting N"; the warnings; write an empty grid.)
+
+see textkit version "0.2" from "textkit.lib".
 
 a map called 'unavailable at' is {}.
 a list called warnings is [].
 a text called 'the availability note' is "".
+a number called 'the first data column' is 1.
 
 To 'a list of names contains' with a list called items and a text called target.
   For each item in items,
@@ -21,7 +22,6 @@ To 'the header names from' with a text called 'the header line'.
   a list called cells is 'split on' of 'the header line' and ",".
   a text called 'the first cell' is element 1 of cells.
   a text called 'the meeting label' is "Meeting".
-  a number called 'the first data column' is 1.
   If 'the first cell' is 'the meeting label' then, Set 'the first data column' to 2.
   a list called 'the header names' is [].
   For each 'column number' from 'the first data column' to cells's length,
@@ -48,7 +48,7 @@ To 'mark unavailable' with a text called person and a number called 'meeting num
   Set element 'meeting number' of row to true.
   Set 'unavailable at''s "{person}" to row.
 
-To 'read a data row' with a text called 'the data line' and a list called 'the header names' and a number called 'meeting number' and a number called 'the first data column'.
+To 'read a data row' with a text called 'the data line' and a list called 'the header names' and a number called 'meeting number'.
   a list called cells is 'split on' of 'the data line' and ",".
   For each 'column number' from 'the first data column' to cells's length,
     a number called 'the header index' is {'column number' subtract 'the first data column'} add 1,
@@ -73,34 +73,30 @@ To 'load the grid from' with a text called path.
     if 'the trimmed line' is not empty then, append 'the trimmed line' to 'the grid lines'.
     Read line from 'the grid file' into 'the current line'.
   Close 'the grid file'.
-  If 'the grid lines''s length is 0 then, Return.
+  If 'the grid lines''s empty then, Return.
   a text called 'the first line' is element 1 of 'the grid lines'.
   a buffer called 'the first line as a buffer' is 'the first line'.
   a number called 'the first byte' is byte 1 of 'the first line as a buffer'.
   a list called 'the header names' is [].
   a number called 'the first data row' is 1.
-  a number called 'the first data column' is 1.
   If 'the first byte' is greater than or equal to 48 and 'the first byte' is less than or equal to 57 then,
     append "the grid has no header row, columns taken in names-file order" to warnings,
     For each person in names, append person to 'the header names'.
   Otherwise,
     Set 'the header names' to 'the header names from' of 'the first line',
     'warn about the header names' of 'the header names',
-    Set 'the first data row' to 2,
-    a list called 'the header cells' is 'split on' of 'the first line' and ",",
-    a text called 'the first header cell' is element 1 of 'the header cells',
-    if 'the first header cell' is "Meeting" then, Set 'the first data column' to 2.
+    Set 'the first data row' to 2.
   'prepare rows for' of 'the header names'.
   a number called 'the meeting number' is 1.
   For each 'row number' from 'the first data row' to 'the grid lines''s length,
     if 'the meeting number' is less than or equal to 'meeting count' then,
       a text called 'the data line' is element 'row number' of 'the grid lines',
-      'read a data row' of 'the data line' and 'the header names' and 'the meeting number' and 'the first data column'.
+      'read a data row' of 'the data line' and 'the header names' and 'the meeting number'.
     Set 'the meeting number' to {'the meeting number' add 1}.
 
 To 'is free for meeting' with a text called person and a number called 'meeting number'.
   a list called row is 'unavailable at''s "{person}".
-  If row's length is 0 then, Return a boolean, true.
+  If row's empty then, Return a boolean, true.
   a boolean called 'the person is unavailable' is element 'meeting number' of row.
   Return a boolean, 'the person is unavailable' is false.
 

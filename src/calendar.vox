@@ -52,7 +52,7 @@ To 'the default first midweek moment'.
   Return a number, 'the weekday on or after' of 'the start of next month' and 'the midweek meeting day'.
 
 To 'the first midweek moment typed as' with a text called 'the start date as typed'.
-  If 'the start date as typed' is "" then,
+  If 'the start date as typed' is empty then,
     a number called 'the typed moment' is 'the default first midweek moment'.
   Otherwise, if 'reads as a moment' of 'the start date as typed' then,
     a number called 'the typed moment' is 'the moment read from' of 'the start date as typed'.
