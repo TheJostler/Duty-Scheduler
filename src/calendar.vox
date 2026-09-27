@@ -1,0 +1,71 @@
+(src/calendar.vox: the meeting days; the start-date rule; the moment and
+ label of meeting N.)
+
+see date version "0.1" from "date.lib".
+
+(Change the congregation's two meeting days here; nothing else names them.)
+a number called 'the midweek meeting day' is 3.
+a number called 'the weekend meeting day' is 7.
+
+a number called 'meeting count' is 0.
+a number called 'the first midweek moment' is 0.
+
+To 'the week of meeting' with a number called 'meeting number'.
+  Return a number, {'meeting number' add 1} divide 2.
+
+To 'meeting is at the weekend' with a number called 'meeting number'.
+  a number called 'the remainder' is 'meeting number' modulo 2.
+  Return a boolean, 'the remainder' is 0.
+
+To 'the kind of meeting' with a number called 'meeting number'.
+  If 'meeting is at the weekend' of 'meeting number' then, Return a text, "weekend".
+  Return a text, "midweek".
+
+To 'the moment of meeting' with a number called 'meeting number'.
+  a number called 'the week' is 'the week of meeting' of 'meeting number'.
+  a number called 'weeks after the first' is 'the week' subtract 1.
+  a number called 'the midweek moment of this week' is 'weeks later' of 'the first midweek moment' and 'weeks after the first'.
+  If 'meeting is at the weekend' of 'meeting number' then,
+    a number called 'days from midweek to weekend' is 'the weekend meeting day' subtract 'the midweek meeting day',
+    Return a number, 'days later' of 'the midweek moment of this week' and 'days from midweek to weekend'.
+  Return a number, 'the midweek moment of this week'.
+
+To 'the long date of' with a number called moment.
+  a text called 'the long date layout' is "%a %e %b %Y".
+  Return a text, 'the moment written as' of moment and 'the long date layout'.
+
+To 'the short date of' with a number called moment.
+  a text called 'the short date layout' is "%-d %b %Y".
+  Return a text, 'the moment written as' of moment and 'the short date layout'.
+
+To 'the label of meeting' with a number called 'meeting number'.
+  a number called moment is 'the moment of meeting' of 'meeting number'.
+  a text called kind is 'the kind of meeting' of 'meeting number'.
+  Return a text, "{'the long date of' of moment} {kind}".
+
+To 'the default first midweek moment'.
+  a number called now is 'the moment now'.
+  a number called 'the start of this month' is 'the start of the month of' of now.
+  a number called 'the start of next month' is 'months later' of 'the start of this month' and 1.
+  Return a number, 'the weekday on or after' of 'the start of next month' and 'the midweek meeting day'.
+
+To 'the first midweek moment typed as' with a text called 'the start date as typed'.
+  If 'the start date as typed' is "" then,
+    a number called 'the typed moment' is 'the default first midweek moment'.
+  Otherwise, if 'reads as a moment' of 'the start date as typed' then,
+    a number called 'the typed moment' is 'the moment read from' of 'the start date as typed'.
+  Otherwise, if 'reads as a description' of 'the start date as typed' then,
+    a number called now is 'the moment now',
+    a number called 'the typed moment' is 'the moment described by' of 'the start date as typed' and now.
+  Otherwise,
+    Print "scheduler: cannot read the start date \"{'the start date as typed'}\"",
+    Exit 1.
+  a number called 'the start of that day' is 'the start of the day of' of 'the typed moment'.
+  a number called weekday is 'the weekday of' of 'the start of that day'.
+  If weekday is not 'the midweek meeting day' then,
+    a text called 'the actual weekday name' is 'the weekday name of' of weekday,
+    a text called 'the required weekday name' is 'the weekday name of' of 'the midweek meeting day',
+    a text called 'the long date' is 'the long date of' of 'the start of that day',
+    Print "scheduler: {'the long date'} is a {'the actual weekday name'}, but the first midweek meeting must be a {'the required weekday name'}",
+    Exit 1.
+  Return a number, 'the start of that day'.

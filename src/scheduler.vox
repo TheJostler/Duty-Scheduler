@@ -2,6 +2,9 @@
  meetings. This file owns the flags, the help text, the order of the
  steps, and the exit codes; every later file is named by the job it does.)
 
+see "./roster.vox".
+see "./calendar.vox".
+
 A flag called weeks is "-w" or "--weeks", it is a number with default 8.
 A flag called 'names path' is "-f" or "--file", it is a text with default "names.txt".
 A flag called 'start date as typed' is "-d" or "--start", it is a text.
@@ -39,3 +42,13 @@ If 'wants help' then,
 If weeks is less than 1 then,
   Print "scheduler: --weeks must be at least 1",
   Exit 1.
+
+'read the names from' with 'names path'.
+the 'meeting count' is weeks multiply 2.
+the 'the first midweek moment' is 'the first midweek moment typed as' of 'start date as typed'.
+
+Print "Duty schedule".
+Print "=============".
+Print "People: {names's length}".
+Print "Weeks: {weeks}".
+Print "First midweek meeting: {'the long date of' of 'the first midweek moment'}".

@@ -1,0 +1,27 @@
+(src/roster.vox: read the names file into a list of names, roster order.)
+
+see textkit version "0.2" from "textkit.lib".
+
+a list called names is [].
+
+To 'read the names from' with a text called path.
+  Open a file for reading called 'the names file' at path.
+  On error print "scheduler: cannot open {path}", exit 1.
+  a buffer called 'the file content'.
+  Read from 'the names file' into 'the file content'.
+  Close 'the names file'.
+  a text called 'the file text' is 'the file content' as text.
+  a list called 'the raw lines' is 'split lines' of 'the file text'.
+  For each 'raw line' in 'the raw lines',
+    a text called 'the trimmed line' is trim of 'raw line',
+    if 'the trimmed line' is not "" then, append 'the trimmed line' to names..
+  If names's length is less than 2 then,
+    Print "scheduler: need at least two people in {path}",
+    Exit 1.
+
+To 'the longest name length'.
+  a number called longest is 0.
+  For each person in names,
+    a number called 'this name length' is 'text length' of person,
+    if 'this name length' is greater than longest then, the longest is 'this name length'..
+  Return a number, longest.
