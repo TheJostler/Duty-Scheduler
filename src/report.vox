@@ -33,7 +33,7 @@ To 'a person is a better summary candidate than the current best' with a number 
   a number called 'the current best count' is element 'the current best' of 'duty counts'.
   Return a boolean, 'the candidate count' is greater than 'the current best count'.
 
-To 'the next person to summarise'.
+To 'the next position to summarise'.
   a number called 'the best position' is 0.
   For each position from 1 to names's length,
     a boolean called 'already summarised' is element position of 'people already summarised',
@@ -48,7 +48,7 @@ To 'print the summary'.
   Print "Summary".
   Print "-------".
   Repeat names's length times,
-    a number called 'the next position' is 'the next person to summarise',
+    a number called 'the next position' is 'the next position to summarise',
     a number called 'the duty count' is element 'the next position' of 'duty counts',
     a text called 'the summarised name' is element 'the next position' of names,
     Print "  {'the duty count'}  {'the summarised name'}",
