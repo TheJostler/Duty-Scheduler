@@ -19,5 +19,14 @@ Expected: the header's "People" line reads `People: 5` - not 4, not 5
 names each carrying stray whitespace - and the run completes (status
 0), since 29 July 2026 is a Wednesday.
 
+**Updated for Task 3:** `scheduler.vox` now runs the whole pipeline in
+one pass, so `expected.out` records the full run, not just the header.
+The names read from this CRLF file are the same five, in the same
+order, as `01-five-people-four-weeks`, so the one week scheduled here
+(meetings 1-2) matches that case's hand-checked trace exactly: M1 door
+Alice/auditorium Bob, M2 door Charlie/auditorium David. This case is
+still read for what it tests: that the CRLF/trim path produces a clean
+five-person roster in the first place.
+
 Expected output and status recorded from the built program after this
 check.

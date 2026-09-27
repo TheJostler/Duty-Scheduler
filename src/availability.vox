@@ -1,0 +1,9 @@
+(src/availability.vox: a stub until Task 4 replaces it with the real
+ availability grid reader. Everyone is free, always, and there are no
+ warnings to report.)
+
+a list called warnings is [].
+a text called 'the availability note' is "no grid at availability.csv, everyone is available".
+
+To 'is free for meeting' with a text called person and a number called 'meeting number'.
+  Return a boolean, true.

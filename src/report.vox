@@ -1,0 +1,85 @@
+(src/report.vox: the terminal schedule, the summary, the CSV.)
+
+a list called 'people already summarised' is [].
+
+To 'the holder text for' with a number called position.
+  If position is 0 then, Return a text, "UNFILLED".
+  Return a text, element position of names.
+
+To 'print the meeting line for' with a number called 'meeting number'.
+  a number called moment is 'the moment of meeting' of 'meeting number'.
+  a text called 'the long date' is 'the long date of' of moment.
+  a text called kind is 'the kind of meeting' of 'meeting number'.
+  a number called 'the door holder' is element 'meeting number' of 'door holders'.
+  a number called 'the auditorium holder' is element 'meeting number' of 'auditorium holders'.
+  a text called 'the door name' is 'the holder text for' of 'the door holder'.
+  a text called 'the auditorium name' is 'the holder text for' of 'the auditorium holder'.
+  a number called 'the name field width' is {'the longest name length'} add 2.
+  a text called 'the padded door name' is 'pad right' of 'the door name' and 'the name field width'.
+  Print "  {'the long date'}  {kind}   door: {'the padded door name'}  auditorium: {'the auditorium name'}".
+
+To 'print the schedule'.
+  For each week from 1 to weeks,
+    a number called 'the midweek meeting number' is {week multiply 2} subtract 1,
+    a number called 'the weekend meeting number' is week multiply 2,
+    Print "",
+    Print "Week {week}",
+    'print the meeting line for' of 'the midweek meeting number',
+    'print the meeting line for' of 'the weekend meeting number'.
+
+To 'a person is a better summary candidate than the current best' with a number called candidate and a number called 'the current best'.
+  If 'the current best' is 0 then, Return a boolean, true.
+  a number called 'the candidate count' is element candidate of 'duty counts'.
+  a number called 'the current best count' is element 'the current best' of 'duty counts'.
+  Return a boolean, 'the candidate count' is greater than 'the current best count'.
+
+To 'the next person to summarise'.
+  a number called 'the best position' is 0.
+  For each position from 1 to names's length,
+    a boolean called 'already summarised' is element position of 'people already summarised',
+    if 'already summarised' is false and {'a person is a better summary candidate than the current best' of position and 'the best position'} then,
+      the 'the best position' is position..
+  Return a number, 'the best position'.
+
+To 'print the summary'.
+  the 'people already summarised' is [].
+  For each person in names, append false to 'people already summarised'.
+  Print "".
+  Print "Summary".
+  Print "-------".
+  Repeat names's length times,
+    a number called 'the next position' is 'the next person to summarise',
+    a number called 'the duty count' is element 'the next position' of 'duty counts',
+    a text called 'the summarised name' is element 'the next position' of names,
+    Print "  {'the duty count'}  {'the summarised name'}",
+    Set element 'the next position' of 'people already summarised' to true.
+  If warnings's length is greater than 0 then,
+    Print "Warnings",
+    For each warning in warnings, Print "  {warning}"..
+  If 'unfilled slots''s length is greater than 0 then,
+    Print "Unfilled slots",
+    For each slot in 'unfilled slots', Print "  {slot}"..
+  Print "CSV written to {'csv path'}".
+
+To 'the meeting label for the csv' with a number called 'meeting number'.
+  a text called kind is 'the kind of meeting' of 'meeting number'.
+  If kind is "weekend" then, Return a text, "Weekend Meeting".
+  Return a text, "Midweek Meeting".
+
+To 'write the csv row for' with a number called 'meeting number' and a file called output.
+  a number called week is 'the week of meeting' of 'meeting number'.
+  a number called moment is 'the moment of meeting' of 'meeting number'.
+  a text called date is 'the short date of' of moment.
+  a text called 'the meeting label' is 'the meeting label for the csv' of 'meeting number'.
+  a number called 'the door holder' is element 'meeting number' of 'door holders'.
+  a number called 'the auditorium holder' is element 'meeting number' of 'auditorium holders'.
+  a text called door is 'the holder text for' of 'the door holder'.
+  a text called auditorium is 'the holder text for' of 'the auditorium holder'.
+  Write "{week},{date},{'the meeting label'},{door},{auditorium}\n" to output.
+
+To 'write the csv to' with a text called path.
+  Open a file for writing called 'the csv file' at path.
+  On error print "scheduler: cannot write {path}", exit 1.
+  Write "Week,Date,Meeting,Door,Auditorium\n" to 'the csv file'.
+  For each 'meeting number' from 1 to 'meeting count', 'write the csv row for' of 'meeting number' and 'the csv file'.
+  Close 'the csv file'.

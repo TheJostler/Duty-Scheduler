@@ -18,5 +18,14 @@ Expected: the header's "First midweek meeting" line reads
 `Wed 29 Jul 2026`, and the run completes normally (status 0) since
 29 July is a Wednesday, matching the midweek meeting day.
 
+**Updated for Task 3:** `scheduler.vox` now runs the whole pipeline in
+one pass, so `expected.out` records the full run, not just the header.
+The one week here is meetings 1-2 of the roster used in
+`01-five-people-four-weeks`, whose `CHECK.md` walks the assignment rule
+in full; M1 (door Alice, auditorium Bob) and M2 (door Charlie,
+auditorium David) match that trace exactly, so this case still only
+needs to be read for what it actually tests: the relative-description
+start date.
+
 Expected output and status recorded from the built program after this
 check.

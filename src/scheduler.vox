@@ -4,6 +4,9 @@
 
 see "./roster.vox".
 see "./calendar.vox".
+see "./availability.vox".
+see "./duties.vox".
+see "./report.vox".
 
 A flag called weeks is "-w" or "--weeks", it is a number with default 8.
 A flag called 'names path' is "-f" or "--file", it is a text with default "names.txt".
@@ -47,8 +50,16 @@ If weeks is less than 1 then,
 the 'meeting count' is weeks multiply 2.
 the 'the first midweek moment' is 'the first midweek moment typed as' of 'start date as typed'.
 
+'prepare the duties'.
+'assign every duty'.
+
 Print "Duty schedule".
 Print "=============".
 Print "People: {names's length}".
 Print "Weeks: {weeks}".
 Print "First midweek meeting: {'the long date of' of 'the first midweek moment'}".
+Print "Availability: {'the availability note'}".
+
+'print the schedule'.
+'print the summary'.
+'write the csv to' with 'csv path'.

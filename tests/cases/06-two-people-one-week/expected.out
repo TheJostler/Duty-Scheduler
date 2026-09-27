@@ -1,19 +1,16 @@
 Duty schedule
 =============
-People: 5
+People: 2
 Weeks: 1
 First midweek meeting: Wed 29 Jul 2026
 Availability: no grid at availability.csv, everyone is available
 
 Week 1
-  Wed 29 Jul 2026  midweek   door: Alice      auditorium: Bob
-  Sun  2 Aug 2026  weekend   door: Charlie    auditorium: David
+  Wed 29 Jul 2026  midweek   door: Alice    auditorium: Bob
+  Sun  2 Aug 2026  weekend   door: Alice    auditorium: Bob
 
 Summary
 -------
-  1  Alice
-  1  Bob
-  1  Charlie
-  1  David
-  0  Eve
+  2  Alice
+  2  Bob
 CSV written to schedule.csv

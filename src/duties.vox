@@ -1,0 +1,62 @@
+(src/duties.vox: the assignment rule; the per-person counts and last-duty
+ record.)
+
+a list called 'duty counts' is [].
+a list called 'last duty meeting' is [].
+a list called 'door holders' is [].
+a list called 'auditorium holders' is [].
+a list called 'unfilled slots' is [].
+
+To 'prepare the duties'.
+  the 'duty counts' is [].
+  the 'last duty meeting' is [].
+  For each person in names,
+    append 0 to 'duty counts',
+    append 0 to 'last duty meeting'.
+  the 'door holders' is [].
+  the 'auditorium holders' is [].
+  For each 'meeting number' from 1 to 'meeting count',
+    append 0 to 'door holders',
+    append 0 to 'auditorium holders'.
+  the 'unfilled slots' is [].
+
+To 'a candidate is better than the current best' with a number called candidate and a number called 'the current best'.
+  If 'the current best' is 0 then, Return a boolean, true.
+  a number called 'the candidate duty count' is element candidate of 'duty counts'.
+  a number called 'the current best duty count' is element 'the current best' of 'duty counts'.
+  If 'the candidate duty count' is less than 'the current best duty count' then, Return a boolean, true.
+  If 'the candidate duty count' is greater than 'the current best duty count' then, Return a boolean, false.
+  a number called 'the candidate last duty' is element candidate of 'last duty meeting'.
+  a number called 'the current best last duty' is element 'the current best' of 'last duty meeting'.
+  Return a boolean, 'the candidate last duty' is less than 'the current best last duty'.
+
+To 'the best person for' with a number called 'meeting number' and a number called 'the person already on duty'.
+  a number called 'the best position' is 0.
+  For each position from 1 to names's length,
+    a text called person is element position of names,
+    if position is not 'the person already on duty' and {'is free for meeting' of person and 'meeting number'} and {'a candidate is better than the current best' of position and 'the best position'} then,
+      the 'the best position' is position..
+  Return a number, 'the best position'.
+
+To 'record a duty for' with a number called position and a number called 'meeting number'.
+  a number called 'the new duty count' is {element position of 'duty counts'} add 1.
+  Set element position of 'duty counts' to 'the new duty count'.
+  Set element position of 'last duty meeting' to 'meeting number'.
+
+To 'assign the duties of meeting' with a number called 'meeting number'.
+  a text called 'the meeting label' is 'the label of meeting' of 'meeting number'.
+  a number called 'the door holder' is 'the best person for' of 'meeting number' and 0.
+  Set element 'meeting number' of 'door holders' to 'the door holder'.
+  If 'the door holder' is 0 then,
+    append "{'the meeting label'} door: nobody is available" to 'unfilled slots'.
+  Otherwise,
+    'record a duty for' of 'the door holder' and 'meeting number'.
+  a number called 'the auditorium holder' is 'the best person for' of 'meeting number' and 'the door holder'.
+  Set element 'meeting number' of 'auditorium holders' to 'the auditorium holder'.
+  If 'the auditorium holder' is 0 then,
+    append "{'the meeting label'} auditorium: nobody is available" to 'unfilled slots'.
+  Otherwise,
+    'record a duty for' of 'the auditorium holder' and 'meeting number'.
+
+To 'assign every duty'.
+  For each 'meeting number' from 1 to 'meeting count', 'assign the duties of meeting' of 'meeting number'.
