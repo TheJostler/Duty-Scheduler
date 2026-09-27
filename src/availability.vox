@@ -1,9 +1,123 @@
-(src/availability.vox: a stub until Task 4 replaces it with the real
- availability grid reader. Everyone is free, always, and there are no
- warnings to report.)
+see textkit version "0.2" from "textkit.lib".
 
+(src/availability.vox: read the grid; answer "is this person free at
+ meeting N"; the warnings; write an empty grid.)
+
+a map called 'unavailable at' is {}.
 a list called warnings is [].
-a text called 'the availability note' is "no grid at availability.csv, everyone is available".
+a text called 'the availability note' is "".
+
+To 'a list of names contains' with a list called items and a text called target.
+  For each item in items,
+    if item is target then, Return a boolean, true..
+  Return a boolean, false.
+
+To 'a fresh unavailable row'.
+  a list called row is [].
+  For each 'meeting number' from 1 to 'meeting count', append false to row.
+  Return a list, row.
+
+To 'the header names from' with a text called 'the header line'.
+  a list called cells is 'split on' of 'the header line' and ",".
+  a text called 'the first cell' is element 1 of cells.
+  a text called 'the meeting label' is "Meeting".
+  a number called 'the first data column' is 1.
+  If 'the first cell' is 'the meeting label' then, Set 'the first data column' to 2.
+  a list called 'the header names' is [].
+  For each 'column number' from 'the first data column' to cells's length,
+    a text called 'the header cell' is element 'column number' of cells,
+    a text called 'the header name' is trim of 'the header cell',
+    append 'the header name' to 'the header names'.
+  Return a list, 'the header names'.
+
+To 'warn about the header names' with a list called 'the header names'.
+  For each 'header name' in 'the header names',
+    if {'a list of names contains' of names and 'header name'} is false then,
+      append "{'header name'} is in the grid but not in the names file, column ignored" to warnings..
+  For each person in names,
+    if {'a list of names contains' of 'the header names' and person} is false then,
+      append "{person} has no column in the grid, treated as always available" to warnings..
+
+To 'prepare rows for' with a list called 'the header names'.
+  For each person in 'the header names',
+    a list called 'the fresh row' is 'a fresh unavailable row',
+    Set 'unavailable at''s "{person}" to 'the fresh row'.
+
+To 'mark unavailable' with a text called person and a number called 'meeting number'.
+  a list called row is 'unavailable at''s "{person}".
+  Set element 'meeting number' of row to true.
+  Set 'unavailable at''s "{person}" to row.
+
+To 'read a data row' with a text called 'the data line' and a list called 'the header names' and a number called 'meeting number' and a number called 'the first data column'.
+  a list called cells is 'split on' of 'the data line' and ",".
+  For each 'column number' from 'the first data column' to cells's length,
+    a number called 'the header index' is {'column number' subtract 'the first data column'} add 1,
+    if 'the header index' is less than or equal to 'the header names''s length then,
+      a text called person is element 'the header index' of 'the header names',
+      a text called cell is element 'column number' of cells,
+      a text called 'the trimmed cell' is trim of cell,
+      if 'the trimmed cell' is "1" then, 'mark unavailable' of person and 'meeting number'...
+
+To 'load the grid from' with a text called path.
+  If path is not available then,
+    Set 'the availability note' to "no grid at {path}, everyone is available",
+    Return.
+  Set 'the availability note' to "read from {path}".
+  Open a file for reading called 'the grid file' at path.
+  a buffer called 'the current line'.
+  a list called 'the grid lines' is [].
+  Read line from 'the grid file' into 'the current line'.
+  While 'the current line' is not empty,
+    a text called 'the raw line' is 'the current line' as text,
+    a text called 'the trimmed line' is trim of 'the raw line',
+    if 'the trimmed line' is not empty then, append 'the trimmed line' to 'the grid lines'.
+    Read line from 'the grid file' into 'the current line'.
+  Close 'the grid file'.
+  If 'the grid lines''s length is 0 then, Return.
+  a text called 'the first line' is element 1 of 'the grid lines'.
+  a buffer called 'the first line as a buffer' is 'the first line'.
+  a number called 'the first byte' is byte 1 of 'the first line as a buffer'.
+  a list called 'the header names' is [].
+  a number called 'the first data row' is 1.
+  a number called 'the first data column' is 1.
+  If 'the first byte' is greater than or equal to 48 and 'the first byte' is less than or equal to 57 then,
+    append "the grid has no header row, columns taken in names-file order" to warnings,
+    For each person in names, append person to 'the header names'.
+  Otherwise,
+    Set 'the header names' to 'the header names from' of 'the first line',
+    'warn about the header names' of 'the header names',
+    Set 'the first data row' to 2,
+    a list called 'the header cells' is 'split on' of 'the first line' and ",",
+    a text called 'the first header cell' is element 1 of 'the header cells',
+    if 'the first header cell' is "Meeting" then, Set 'the first data column' to 2.
+  'prepare rows for' of 'the header names'.
+  a number called 'the meeting number' is 1.
+  For each 'row number' from 'the first data row' to 'the grid lines''s length,
+    if 'the meeting number' is less than or equal to 'meeting count' then,
+      a text called 'the data line' is element 'row number' of 'the grid lines',
+      'read a data row' of 'the data line' and 'the header names' and 'the meeting number' and 'the first data column'.
+    Set 'the meeting number' to {'the meeting number' add 1}.
 
 To 'is free for meeting' with a text called person and a number called 'meeting number'.
-  Return a boolean, true.
+  a list called row is 'unavailable at''s "{person}".
+  If row's length is 0 then, Return a boolean, true.
+  a boolean called 'the person is unavailable' is element 'meeting number' of row.
+  Return a boolean, 'the person is unavailable' is false.
+
+To 'write an empty grid to' with a text called path.
+  If path is available then,
+    Print "scheduler: {path} already exists, not overwriting it",
+    Exit 1.
+  Open a file for writing called 'the grid file' at path.
+  On error print "scheduler: cannot write {path}", exit 1.
+  a text called 'the header row' is join of names and ",".
+  Write "Meeting,{'the header row'}\n" to 'the grid file'.
+  a list called 'the zero cells' is [].
+  For each person in names, append "0" to 'the zero cells'.
+  a text called 'the zero row' is join of 'the zero cells' and ",".
+  For each 'meeting number' from 1 to 'meeting count',
+    a text called 'the meeting label' is 'the label of meeting' of 'meeting number',
+    Write "{'the meeting label'},{'the zero row'}\n" to 'the grid file'.
+  Close 'the grid file'.
+  Print "Wrote an empty grid for {'meeting count'} meetings and {names's length} people to {path}".
+  Exit 0.

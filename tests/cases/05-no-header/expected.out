@@ -1,0 +1,21 @@
+Duty schedule
+=============
+People: 5
+Weeks: 1
+First midweek meeting: Wed 29 Jul 2026
+Availability: read from availability.csv
+
+Week 1
+  Wed 29 Jul 2026  midweek   door: Alice      auditorium: Bob
+  Sun  2 Aug 2026  weekend   door: Charlie    auditorium: David
+
+Summary
+-------
+  1  Alice
+  1  Bob
+  1  Charlie
+  1  David
+  0  Eve
+Warnings
+  the grid has no header row, columns taken in names-file order
+CSV written to schedule.csv

@@ -1,0 +1,19 @@
+Duty schedule
+=============
+People: 2
+Weeks: 1
+First midweek meeting: Wed 29 Jul 2026
+Availability: read from availability.csv
+
+Week 1
+  Wed 29 Jul 2026  midweek   door: Alice    auditorium: UNFILLED
+  Sun  2 Aug 2026  weekend   door: Alice    auditorium: UNFILLED
+
+Summary
+-------
+  2  Alice
+  0  Bob
+Unfilled slots
+  Wed 29 Jul 2026 midweek auditorium: nobody is available
+  Sun 2 Aug 2026 weekend auditorium: nobody is available
+CSV written to schedule.csv

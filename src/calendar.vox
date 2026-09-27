@@ -41,7 +41,9 @@ To 'the short date of' with a number called moment.
 To 'the label of meeting' with a number called 'meeting number'.
   a number called moment is 'the moment of meeting' of 'meeting number'.
   a text called kind is 'the kind of meeting' of 'meeting number'.
-  Return a text, "{'the long date of' of moment} {kind}".
+  a text called 'the label date layout' is "%a %-d %b %Y".
+  a text called 'the label date' is 'the moment written as' of moment and 'the label date layout'.
+  Return a text, "{'the label date'} {kind}".
 
 To 'the default first midweek moment'.
   a number called now is 'the moment now'.
