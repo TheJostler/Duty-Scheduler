@@ -3,8 +3,8 @@ duty-scheduler: fair door and auditorium duties for midweek and weekend meetings
 Usage: scheduler [OPTIONS]
   -f, --file <path>      Names file, one person per line (default: names.txt)
   -w, --weeks <N>        Number of weeks to schedule (default: 8)
-  -d, --start <date>     Date of the first midweek meeting (default: the first
-                         midweek meeting day on or after the 1st of next month).
+  -d, --start <date>     Date of the first meeting, midweek or weekend (default:
+                         the first meeting on or after the 1st of next month).
                          Accepts 2026-07-29, 20260729, 29 Jul 2026, or a phrase
                          such as "next wednesday".
   -s, --schedule <path>  Availability grid CSV (default: availability.csv)

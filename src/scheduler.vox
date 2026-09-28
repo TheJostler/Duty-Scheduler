@@ -9,7 +9,7 @@ see "./duties.vox".
 see "./report.vox".
 
 A text called Program is arguments's name.
-A text called 'Program Version' is "1.0.0".
+A text called 'Program Version' is "1.1.0".
 
 A flag called weeks is "-w" or "--weeks", it is a number with default 8.
 A flag called 'names path' is "-f" or "--file", it is a text with default "names.txt".
@@ -32,8 +32,8 @@ If 'wants help' then,
   Print "Usage: scheduler [OPTIONS]",
   Print "  -f, --file <path>      Names file, one person per line (default: names.txt)",
   Print "  -w, --weeks <N>        Number of weeks to schedule (default: 8)",
-  Print "  -d, --start <date>     Date of the first midweek meeting (default: the first",
-  Print "                         midweek meeting day on or after the 1st of next month).",
+  Print "  -d, --start <date>     Date of the first meeting, midweek or weekend (default:",
+  Print "                         the first meeting on or after the 1st of next month).",
   Print "                         Accepts 2026-07-29, 20260729, 29 Jul 2026, or a phrase",
   Print "                         such as \"next wednesday\".",
   Print "  -s, --schedule <path>  Availability grid CSV (default: availability.csv)",
@@ -59,7 +59,7 @@ If weeks is less than 1 then,
 
 'read the names from' with 'names path'.
 the 'meeting count' is weeks multiply 2.
-Set 'the first midweek moment' to 'the first midweek moment typed as' of 'start date as typed'.
+Set 'the first meeting moment' to 'the first meeting moment typed as' of 'start date as typed'.
 
 If 'wants an empty grid' then, 'write an empty grid to' with 'grid path'.
 
@@ -71,7 +71,7 @@ Print "Duty schedule".
 Print "=============".
 Print "People: {names's length}".
 Print "Weeks: {weeks}".
-Print "First midweek meeting: {'the long date of' of 'the first midweek moment'}".
+Print "First meeting: {'the long date of' of 'the first meeting moment'} {'the kind of meeting' of 1}".
 Print "Availability: {'the availability note'}".
 
 'print the schedule'.

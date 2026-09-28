@@ -1,0 +1,23 @@
+Duty schedule
+=============
+People: 5
+Weeks: 2
+First meeting: Sun  4 Oct 2026 weekend
+Availability: no grid at availability.csv, everyone is available
+
+Week 1
+  Sun  4 Oct 2026  weekend   door: Alice      auditorium: Bob
+  Wed  7 Oct 2026  midweek   door: Charlie    auditorium: David
+
+Week 2
+  Sun 11 Oct 2026  weekend   door: Eve        auditorium: Alice
+  Wed 14 Oct 2026  midweek   door: Bob        auditorium: Charlie
+
+Summary
+-------
+  2  Alice
+  2  Bob
+  2  Charlie
+  1  David
+  1  Eve
+CSV written to schedule.csv

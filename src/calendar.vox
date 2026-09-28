@@ -8,27 +8,38 @@ a number called 'the midweek meeting day' is 3.
 a number called 'the weekend meeting day' is 7.
 
 a number called 'meeting count' is 0.
-a number called 'the first midweek moment' is 0.
+a number called 'the first meeting moment' is 0.
+a boolean called 'the run starts at the weekend' is false.
 
 To 'the week of meeting' with a number called 'meeting number'.
   Return a number, {'meeting number' add 1} divide 2.
 
 To 'meeting is at the weekend' with a number called 'meeting number'.
   a number called 'the remainder' is 'meeting number' modulo 2.
+  If 'the run starts at the weekend' then, Return a boolean, 'the remainder' is 1.
   Return a boolean, 'the remainder' is 0.
 
 To 'the kind of meeting' with a number called 'meeting number'.
   If 'meeting is at the weekend' of 'meeting number' then, Return a text, "weekend".
   Return a text, "midweek".
 
+To 'the first meeting day'.
+  If 'the run starts at the weekend' then, Return a number, 'the weekend meeting day'.
+  Return a number, 'the midweek meeting day'.
+
+To 'the other meeting day'.
+  If 'the run starts at the weekend' then, Return a number, 'the midweek meeting day'.
+  Return a number, 'the weekend meeting day'.
+
 To 'the moment of meeting' with a number called 'meeting number'.
   a number called 'the week' is 'the week of meeting' of 'meeting number'.
   a number called 'weeks after the first' is 'the week' subtract 1.
-  a number called 'the midweek moment of this week' is 'weeks later' of 'the first midweek moment' and 'weeks after the first'.
-  If 'meeting is at the weekend' of 'meeting number' then,
-    a number called 'days from midweek to weekend' is 'the weekend meeting day' subtract 'the midweek meeting day',
-    Return a number, 'days later' of 'the midweek moment of this week' and 'days from midweek to weekend'.
-  Return a number, 'the midweek moment of this week'.
+  a number called 'the first meeting of this week' is 'weeks later' of 'the first meeting moment' and 'weeks after the first'.
+  a number called 'the remainder' is 'meeting number' modulo 2.
+  If 'the remainder' is 0 then,
+    a number called 'the gap in days' is {{'the other meeting day' subtract 'the first meeting day'} add 7} modulo 7,
+    Return a number, 'days later' of 'the first meeting of this week' and 'the gap in days'.
+  Return a number, 'the first meeting of this week'.
 
 To 'the long date of' with a number called moment.
   a text called 'the long date layout' is "%a %e %b %Y".
@@ -45,15 +56,18 @@ To 'the label of meeting' with a number called 'meeting number'.
   a text called 'the label date' is 'the moment written as' of moment and 'the label date layout'.
   Return a text, "{'the label date'} {kind}".
 
-To 'the default first midweek moment'.
+To 'the default first meeting moment'.
   a number called now is 'the moment now'.
   a number called 'the start of this month' is 'the start of the month of' of now.
   a number called 'the start of next month' is 'months later' of 'the start of this month' and 1.
-  Return a number, 'the weekday on or after' of 'the start of next month' and 'the midweek meeting day'.
+  a number called 'the next midweek moment' is 'the weekday on or after' of 'the start of next month' and 'the midweek meeting day'.
+  a number called 'the next weekend moment' is 'the weekday on or after' of 'the start of next month' and 'the weekend meeting day'.
+  If 'the next midweek moment' is less than 'the next weekend moment' then, Return a number, 'the next midweek moment'.
+  Return a number, 'the next weekend moment'.
 
-To 'the first midweek moment typed as' with a text called 'the start date as typed'.
+To 'the first meeting moment typed as' with a text called 'the start date as typed'.
   If 'the start date as typed' is empty then,
-    a number called 'the typed moment' is 'the default first midweek moment'.
+    a number called 'the typed moment' is 'the default first meeting moment'.
   Otherwise, if 'reads as a moment' of 'the start date as typed' then,
     a number called 'the typed moment' is 'the moment read from' of 'the start date as typed'.
   Otherwise, if 'reads as a description' of 'the start date as typed' then,
@@ -64,10 +78,15 @@ To 'the first midweek moment typed as' with a text called 'the start date as typ
     Exit 1.
   a number called 'the start of that day' is 'the start of the day of' of 'the typed moment'.
   a number called weekday is 'the weekday of' of 'the start of that day'.
-  If weekday is not 'the midweek meeting day' then,
+  If weekday is 'the midweek meeting day' then,
+    Set 'the run starts at the weekend' to false.
+  Otherwise, if weekday is 'the weekend meeting day' then,
+    Set 'the run starts at the weekend' to true.
+  Otherwise,
+    a text called 'the midweek weekday name' is 'the weekday name of' of 'the midweek meeting day',
+    a text called 'the weekend weekday name' is 'the weekday name of' of 'the weekend meeting day',
     a text called 'the actual weekday name' is 'the weekday name of' of weekday,
-    a text called 'the required weekday name' is 'the weekday name of' of 'the midweek meeting day',
     a text called 'the long date' is 'the long date of' of 'the start of that day',
-    Print "scheduler: {'the long date'} is a {'the actual weekday name'}, but the first midweek meeting must be a {'the required weekday name'}",
+    Print "scheduler: {'the long date'} is a {'the actual weekday name'}, but a meeting is on a {'the midweek weekday name'} or a {'the weekend weekday name'}",
     Exit 1.
   Return a number, 'the start of that day'.

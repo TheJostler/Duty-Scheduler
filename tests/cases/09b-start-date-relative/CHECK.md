@@ -9,14 +9,14 @@ does not depend on `now`), landing on 2026-07-29 - the same Wednesday
 the design's worked example uses.
 
 This case exists to prove the second branch of
-`'the first midweek moment typed as'` fires: the text does not
+`'the first meeting moment typed as'` fires: the text does not
 `'reads as a moment'` on its own (it is not a plain date), so the
 function falls through to `'reads as a description'`, which is true,
 and resolves via `'the moment described by'`.
 
-Expected: the header's "First midweek meeting" line reads
-`Wed 29 Jul 2026`, and the run completes normally (status 0) since
-29 July is a Wednesday, matching the midweek meeting day.
+Expected: the header's "First meeting" line reads
+`Wed 29 Jul 2026 midweek`, and the run completes normally (status 0)
+since 29 July is a Wednesday, one of the two meeting days.
 
 **Updated for Task 3:** `scheduler.vox` now runs the whole pipeline in
 one pass, so `expected.out` records the full run, not just the header.
